@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+.eggs/
+
+# Build artifacts
+dist/
+build/
+
+# PyInstaller spec file (脚本配置，允许提交)
+
+
+# Environments
+.env
+.venv/
+venv/
+
+# Cache & Logs
+cache.json
+logs/
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*~
+.claude/
+CLAUDE.md
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,8 @@
+# FastAPI框架（核心Web服务依赖）
+fastapi==0.111.0
+
+# Uvicorn（ASGI服务器，用于运行FastAPI应用）
+uvicorn==0.30.1
+
+# Requests（用于发送HTTP请求，调用火山引擎API）
+requests==2.32.3
