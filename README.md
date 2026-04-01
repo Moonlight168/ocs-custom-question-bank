@@ -1,6 +1,8 @@
 # OCS 自定义题库 API 服务
 
-为 [OCSJS](https://github.com/ocsjs/ocsjs) 油猴刷题脚本提供自定义题库 API 服务，基于 FastAPI + 火山方舟大模型，支持双模型验证机制提高答案准确性。
+为 [OCSJS](https://github.com/ocsjs/ocsjs) 油猴刷题脚本提供自定义题库 API 服务，基于 FastAPI 开发，内置双模型验证机制提高答案准确性。
+
+> 📌 **当前版本适配说明：** 已完整适配字节跳动火山方舟豆包系列大模型，支持单/双模型灵活配置。
 
 ## 功能特性
 
@@ -29,8 +31,14 @@ copy .env.example .env
 编辑 `.env` 文件：
 
 ```env
+# 生成模型 API Key（必填）
 ARK_API_KEY_GENERATOR=your_api_key_here
-MODEL_NAME_GENERATOR=doubao-seed-1-6-flash-250828
+# 验证模型 API Key（可选，默认与生成模型共用）
+# ARK_API_KEY_VERIFIER=your_api_key_here
+# 生成模型名称（默认：doubao-seed-1-6-flash-250828）
+# MODEL_NAME_GENERATOR=doubao-seed-1-6-flash-250828
+# 验证模型名称（可选，默认与生成模型相同）
+# MODEL_NAME_VERIFIER=doubao-seed-1-6-flash-250828
 ```
 
 ### 3. 启动服务
@@ -74,6 +82,7 @@ API 遵循 OCSJS 题库接口规范：
 
 **响应格式：**
 
+成功响应（code=1）：
 ```json
 {
   "code": 1,
@@ -86,6 +95,14 @@ API 遵循 OCSJS 题库接口规范：
 }
 ```
 
+失败响应（code=0）：
+```json
+{
+  "code": 0,
+  "msg": "错误信息描述"
+}
+```
+
 **示例请求：**
 
 ```bash
@@ -95,10 +112,11 @@ curl "http://localhost:8000/search?title=什么是光合作用？&type=single&op
 ## 双模型验证机制
 
 1. **生成模型** 首先生成答案
-2. **验证模型** 独立验证答案
+2. **验证模型** 独立验证答案（可配置为与生成模型相同或不同）
 3. **答案一致** → 直接返回
-4. **答案不一致** → 自动重试（最多 2 次）
+4. **答案不一致** → 自动重试（最多 2 次，可配置）
 5. **重试仍不一致** → 使用生成模型答案并记录警告
+6. **可配置开关**：可通过 `ENABLE_DUAL_MODEL_VERIFICATION` 关闭验证，直接使用单模型
 
 ## 项目结构
 
@@ -106,14 +124,14 @@ curl "http://localhost:8000/search?title=什么是光合作用？&type=single&op
 local_api_ocs/
 ├── src/
 │   ├── __init__.py
-│   ├── server.py          # API 服务主程序
-│   └── config.py          # 配置模块
-├── tests/                 # 测试文件
+│   ├── server.py          # FastAPI API 服务主程序
+│   └── config.py          # 双模型配置模块
+├── tests/                 # pytest 测试文件
 ├── scripts/               # 工具脚本
 │   └── package_project.bat # PyInstaller 打包脚本
-├── logs/                  # 日志目录（自动创建）
-├── cache.json             # 答案缓存（自动创建）
-├── .env                   # 环境变量（不提交）
+├── logs/                  # 日志目录（自动创建，每日轮转）
+├── cache.json             # 答案缓存（自动创建，持久化存储）
+├── .env                   # 环境变量（不提交到仓库）
 ├── .env.example           # 环境变量模板
 ├── requirements.txt       # 生产依赖
 └── requirements-dev.txt   # 开发依赖
@@ -149,13 +167,14 @@ scripts/package_project.bat
 | 变量名 | 说明 | 默认值 |
 |--------|------|--------|
 | ARK_API_KEY_GENERATOR | 生成模型 API Key（火山方舟） | 必填 |
-| ARK_API_KEY_VERIFIER | 验证模型 API Key | 同 GENERATOR |
+| ARK_API_KEY_VERIFIER | 验证模型 API Key | 同 ARK_API_KEY_GENERATOR |
 | MODEL_NAME_GENERATOR | 生成模型名称 | doubao-seed-1-6-flash-250828 |
-| MODEL_NAME_VERIFIER | 验证模型名称 | doubao-seed-1-6-flash-250828 |
+| MODEL_NAME_VERIFIER | 验证模型名称 | 同 MODEL_NAME_GENERATOR |
 | ARK_BASE_URL | API 基础 URL | https://ark.cn-beijing.volces.com/api/v3 |
+| CACHE_FILE | 缓存文件路径 | cache.json |
 | LOG_LEVEL | 日志级别 | DEBUG |
 | ENABLE_DUAL_MODEL_VERIFICATION | 启用双模型验证 | true |
-| MAX_VERIFICATION_RETRIES | 最大重试次数 | 2 |
+| MAX_VERIFICATION_RETRIES | 答案不一致最大重试次数 | 2 |
 
 ## 相关项目
 
