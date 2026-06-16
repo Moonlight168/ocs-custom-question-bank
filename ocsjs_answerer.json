@@ -1,0 +1,19 @@
+[
+    {
+        "name": "豆包速问",
+        "url": "http://localhost:8086/search",
+        "homepage": "http://localhost:8086/docs",
+        "method": "get",
+        "contentType": "json",
+        "type": "GM_xmlhttpRequest",
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "data": {
+            "title": "${title}",
+            "type": "${type}",
+            "options": "${options}"
+        },
+        "handler": "return (res) => { if (!res || res.code !== 1 || !Array.isArray(res.results)) return [[undefined, '未找到答案']]; return res.results.map(i => { var ans = i.answer; if (Array.isArray(ans)) ans = ans.join('#'); if (ans == null) ans = ''; ans = String(ans).trim(); var q = i.question || ''; var blanks = (q.match(/__\\d+__/g) || []).length + (q.match(/_\\d+_/g) || []).length + (q.match(/[（(]\\s*[)）]/g) || []).length; if (blanks >= 2 && ans.indexOf('#') < 0 && ans.indexOf('|') < 0 && ans.indexOf('\\n') < 0 && /[,，、]/.test(ans)) { ans = ans.split(/[,，、]/).map(function(s){return s.trim();}).filter(Boolean).join('#'); } return [i.question, ans]; }); }"
+    }
+]
